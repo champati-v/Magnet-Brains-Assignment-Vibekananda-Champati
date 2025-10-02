@@ -16,17 +16,17 @@ const Login = () => {
     console.log("Button Clicked");
 
     if(!validateEmail(email)){
-      setError('Please enter a valid email address');
+      setError('*Please enter a valid email address');
       return;
     }
 
     if(!password){
-      setError('Please enter your password');
+      setError('*Please enter your password');
       return;
     }
 
     if(password.length < 6){
-      setError('Password must be at least 6 characters long');
+      setError('*Password must be at least 6 characters long');
       return;
     }
 
@@ -62,7 +62,7 @@ const Login = () => {
           <button type='submit' className='btn-primary'>Login</button>
 
           <p className='text-sm text-center mt-4'>Not Registered Yet? {" "}
-            <Link to='/signup' className='text-blue-500'>Create an Account</Link>
+            <Link to='/signup' className='text-blue-500 hover:underline'>Create an Account</Link>
           </p>
         </form>
       </div>
