@@ -42,9 +42,9 @@ const AddEditTask = ({onClose}) => {
             <div>
                 <label className='input-label'>Set Priority</label>
                 <div className='flex items-center gap-3 mt-2'>
-                    <p className='badge border border-green-600'>low</p>
-                    <p className='badge border border-yellow-500'>medium</p>
-                    <p className='badge border border-red-500'>high</p>
+                    <p className={`badge cursor-pointer border border-green-600 ${priority === "low"? "bg-green-600 text-white" : ""}`} onClick={() => setPriority("low")} >low</p>
+                    <p className={`badge cursor-pointer border border-yellow-600 ${priority === "medium"? "bg-yellow-600 text-white" : ""}`} onClick={() => setPriority("medium")} >medium</p>
+                    <p className={`badge cursor-pointer border border-red-500 ${priority === "high"? "bg-red-500 text-white" : ""}`} onClick={() => setPriority("high")} >high</p>
                 </div>
             </div>
 
