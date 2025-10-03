@@ -1,10 +1,12 @@
 require('dotenv').config();
 
-const config = require('./config.json');
+const connectionString = process.env.CONNECTION_STRING;
+
+//Mongo DB connection
 const mongoose = require('mongoose');
+mongoose.connect(connectionString);
 
-mongoose.connect(config.connectionString);
-
+//importing models
 const User = require('./models/user.model');
 const Task = require('./models/task.model');
 
@@ -12,6 +14,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();  
 
+//JWT token
 const jwt = require('jsonwebtoken');
 const authenticationToken = require('./utils');
 
@@ -119,7 +122,7 @@ app.post("/login", async (req, res) => {
 //add task
 app.post("/add-task", authenticationToken, async (req, res) => {
     const {title, description, priority, dueDate} = req.body;
-    const user = req.user;
+    const {user} = req.user;
 
     if(!title){
         return res
@@ -138,7 +141,7 @@ app.post("/add-task", authenticationToken, async (req, res) => {
             title,
             description,
             priority,
-            dueDate,
+            dueDate: dueDate || null,
             userId: user._id
         });
 
@@ -148,13 +151,81 @@ app.post("/add-task", authenticationToken, async (req, res) => {
             error: false,
             message: "Task added successfully!"
         });
+
     } catch (error) {
+        console.log("HERE IS THE ERROR",error)
         return res.status(500).json({
             error: true,
             message: "Internal server error"
         });
     }
 
+})
+
+//edit-task
+app.post("/edit-task/:taskId", authenticationToken, async (req, res) => {
+    const taskId = req.params.taskId;
+    const {title, description, priority, status, dueDate} = req.body;
+    const {user} = req.user;
+
+    if(!title || !description){
+        return res
+        .status(400)
+        .json({error: true, message: "No Changes Made"});
+    }
+
+    try{
+        const task = await Task.findOne({ _id: taskId, userId: user._id }); 
+
+        if (!task) {
+            return res.status(404).json({
+                error: true,
+                message: "Task not found"
+            });
+        }
+
+        if(title) task.title = title;
+        if(description) task.description = description;
+        if(priority) task.priority = priority;
+        if(status) task.status = status;
+        if(dueDate) task.dueDate = dueDate;
+
+        await task.save();
+
+        return res.json({
+            error: false,
+            message: "Task Updated successfully!"
+        });
+
+    } catch (error) {
+        console.log("HERE IS THE ERROR",error)
+        return res.status(500).json({
+            error: true,
+            message: "Internal server error"
+        });
+    }
+
+})
+
+//get-tasks
+app.get("/get-all-tasks", authenticationToken, async (req, res) => {
+    const {user} = req.user;
+
+    try{
+        const tasks = await Task.find({userId: user._id}).sort({dueDate: 1});
+
+        return res.json({
+            error: false,
+            tasks,
+            message: "Tasks fetched successfully!"
+        });
+    } catch (error) {
+        console.log("HERE IS THE ERROR",error)
+        return res.status(500).json({
+            error: true,
+            message: "Internal server error"
+        });
+    }
 })
 
 app.listen(5000);
