@@ -112,12 +112,40 @@ app.post("/login", async (req, res) => {
             accessToken
         });
     } else {
-        return res.json({
+        return res
+        .status(400)
+        .json({
             error: true,
             message: "Invalid credentials"
         });
     }
 })
+
+//get user
+app.get("/get-user", authenticationToken, async (req, res) => {
+    const {user} = req.user;
+
+    const isUser = await User.findOne({_id: user._id});
+
+    if(!isUser){
+        return res.json({
+            error: true,
+            message: "User not found"
+        })
+    }
+
+    return res.json({
+        error: false,
+        user: {
+            fullName: isUser.fullName, 
+            email: isUser.email, 
+            _id: isUser._id, 
+            createdOn: isUser.createdOn
+        },
+        message: "User fetched successfully!"
+    });
+})
+
 
 //add task
 app.post("/add-task", authenticationToken, async (req, res) => {
@@ -218,6 +246,36 @@ app.get("/get-all-tasks", authenticationToken, async (req, res) => {
             error: false,
             tasks,
             message: "Tasks fetched successfully!"
+        });
+    } catch (error) {
+        console.log("HERE IS THE ERROR",error)
+        return res.status(500).json({
+            error: true,
+            message: "Internal server error"
+        });
+    }
+})
+
+//delete task
+app.delete("/delete-task/:taskId", authenticationToken, async (req, res) => {
+    const taskId = req.params.taskId;
+    const {user} = req.user;
+
+    try{
+        const task = await Task.findOneAndDelete({ _id: taskId, userId: user._id });
+
+        if (!task) {
+            return res.status(404).json({
+                error: true,
+                message: "Task not found"
+            });
+        }
+
+        await task.deleteOne({_id: taskId, userId: user._id});
+
+        return res.json({
+            error: false,
+            message: "Task deleted successfully"
         });
     } catch (error) {
         console.log("HERE IS THE ERROR",error)

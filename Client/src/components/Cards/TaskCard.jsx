@@ -3,7 +3,7 @@ import { IoMdTime } from "react-icons/io";
 import { LuPencilLine } from "react-icons/lu";
 import { ImBin } from "react-icons/im";
 
-const TaskCard = ({title, date, task, priority}) => {
+const TaskCard = ({title, date, task, priority, onEdit, onDelete}) => {
   return (
     <div className=''>
         <div className='border border-slate-200 rounded-md p-4 h-42 w-80 relative'>
@@ -19,8 +19,8 @@ const TaskCard = ({title, date, task, priority}) => {
                     <p className='text-sm text-slate-500'>{date}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <LuPencilLine className='text-blue-500 inline mr-1' />
-                    <ImBin className='text-red-500 inline' />
+                    <LuPencilLine className='text-slate-500 hover:text-blue-500 cursor-pointer inline mr-1' onClick={() => onEdit()} />
+                    <ImBin className='text-slate-500 hover:text-red-500 cursor-pointer inline' onClick={() => onDelete()} />
                 </div>
             </div>    
         </div>

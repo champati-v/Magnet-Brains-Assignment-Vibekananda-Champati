@@ -1,14 +1,49 @@
-import React from 'react'
 import { useState } from 'react';
 import { IoMdClose } from 'react-icons/io';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import moment from 'moment';
 
-const AddEditTask = ({onClose}) => {
+const AddEditTask = ({onClose, getAllTasks, onSuccess, taskData}) => {
 
-    const [title, setTitle] = useState("")
-    const [description, setDescription] = useState("")
-    const [priority, setPriority] = useState("low")
-    const [deadline, setDeadline] = useState("")
+    const [title, setTitle] = useState(taskData ? taskData.title : "")
+    const [description, setDescription] = useState(taskData ? taskData.description : "")
+    const [priority, setPriority] = useState(taskData ? taskData.priority : "low")
+    const [dueDate, setDueDate] = useState(taskData ? moment(taskData.dueDate).format('YYYY-MM-DD') : Date.now())
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState("")
 
+
+    const addTask = async() => {
+        try {
+            setIsLoading(true);
+            const response = await axios.post("http://localhost:5000/add-task", {
+                title,
+                description,
+                priority,
+                dueDate
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            if (response.status === 200) {
+                // Task added successfull
+                getAllTasks();
+                onClose();
+                onSuccess();
+            }
+        } catch (error) {
+            if(error.response &&
+               error.response.data &&
+               error.response.data.message){
+                setError(error.response.data.message);
+                toast.error(error.response.data.message);
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
   return (
     <div className='relative'>
@@ -53,13 +88,13 @@ const AddEditTask = ({onClose}) => {
                 <input
                     type="date"
                     className="bg-zinc-700 p-2 rounded-sm text-slate-400 outline-none"
-                    value={deadline}
-                    onChange={(e) => setDeadline(e.target.value)}
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
                 />
             </div>
         </div>
 
-        <button className='btn-primary mt-4 p-3' onClick={() => {}}>Add Task</button>
+        <button className='btn-primary mt-4 p-3' onClick={addTask}>{isLoading ? <span>Adding...</span> : "Add Task"}</button>
     </div>
   )
 }

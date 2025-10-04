@@ -2,15 +2,19 @@ import Home from "./pages/Home/Home"
 import {BrowserRouter as Router, Routes, Route} from "react-router-dom"
 import Login from "./pages/Login/Login"
 import Signup from "./pages/Signup/Signup"
+import { Toaster } from "react-hot-toast"
 
 const routes = (
-  <Router>
-    <Routes>
-      <Route path="/dashboard" exact element={<Home />} />
-      <Route path="/login" exact element={<Login />} />
-      <Route path="/signup" exact element={<Signup />} />
-    </Routes>
-  </Router>
+  <>
+    <Toaster position="bottom-right" />
+    <Router>
+      <Routes>
+        <Route path="/dashboard" exact element={<Home />} />
+        <Route path="/login" exact element={<Login />} />
+        <Route path="/signup" exact element={<Signup />} />
+      </Routes>
+    </Router>
+  </>
 )
 
 const App = () => {

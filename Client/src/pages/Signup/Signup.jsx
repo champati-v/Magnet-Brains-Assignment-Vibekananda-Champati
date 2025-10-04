@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import Navbar from '../../components/Navbar/Navbar'
 import PasswordInput from '../../components/Input/PasswordInput'
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 import { validateEmail } from '../../utils/helper'
+import axios from 'axios'
 
 const Signup = () => {
 
@@ -10,8 +11,10 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
 
     if(!name || !email || !password){
@@ -32,6 +35,34 @@ const Signup = () => {
     setError("");
 
     //signup
+    try{
+      console.log("Signing up...", name, email, password);
+      const response = await axios.post("http://localhost:5000/signup", {
+        fullName: name,
+        email: email,
+        password: password,
+      });
+
+
+      if(response.data && response.data.error){
+        setError(`*${response.data.message}`);
+        return
+      }
+
+      if(response.data && response.data.accessToken){
+        localStorage.setItem('token', response.data.accessToken);
+        navigate('/dashboard');
+      }
+    } catch (error) {
+
+      console.log("Error during signup:", error);
+
+      if (error.response && error.response.data && error.response.data.message) {
+          setError(`*${error.response.data.message}`);
+      } else {
+          setError('*An unexpected error occurred.');
+      }
+    }
   }
 
   return (
